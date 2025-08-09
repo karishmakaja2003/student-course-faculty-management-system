@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Login Page</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #eef2f3;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .login-container {
+      background-color: white;
+      padding: 40px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+      width: 300px;
+    }
+
+    h2 {
+      text-align: center;
+      color: #333;
+    }
+
+    input[type="text"],
+    input[type="password"] {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    .error {
+      color: red;
+      text-align: center;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="login-container">
+    <h2>Login</h2>
+    <input type="text" id="userId" placeholder="User ID" />
+    <input type="password" id="password" placeholder="Password" />
+    <button onclick="login()">Login</button>
+    <p class="error" id="errorMsg"></p>
+  </div>
+
+  <script>
+    function login() {
+      const userId = document.getElementById("userId").value;
+      const password = document.getElementById("password").value;
+
+      const loginData = {
+        userId,
+        password
+      };
+
+      fetch("http://localhost:8080/api/users/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(loginData)
+      })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error("Invalid credentials");
+          }
+          return response.json();
+        })
+        .then(data => {
+          localStorage.setItem("userId", data.userId);
+          localStorage.setItem("role", data.role);
+          localStorage.setItem("username", data.username);
+
+          // Redirect based on role
+          if (data.role === "admin") {
+            window.location.href = "dashboard.html";
+          } else if (data.role === "student") {
+            window.location.href = "student-view.html";
+          } else if (data.role === "faculty") {
+            window.location.href = "faculty-view.html";
+          } else {
+            document.getElementById("errorMsg").innerText = "Unknown role.";
+          }
+        })
+        .catch(error => {
+          document.getElementById("errorMsg").innerText = error.message;
+        });
+    }
+  </script>
+
+</body>
+</html>

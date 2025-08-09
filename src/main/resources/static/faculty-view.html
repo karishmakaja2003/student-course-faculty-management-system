@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Faculty Dashboard</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background: #eef5f9;
+    }
+    h2 {
+      text-align: center;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 30px;
+    }
+    th, td {
+      padding: 10px;
+      text-align: center;
+      border: 1px solid #ccc;
+    }
+    th {
+      background-color: #28a745;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Faculty Details</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>DOB</th>
+        <th>Qualifications</th>
+        <th>Designation</th>
+        <th>Phone Number</th>
+      </tr>
+    </thead>
+    <tbody id="facultyTableBody"></tbody>
+  </table>
+
+  <h2>Course Details</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Course Name</th>
+        <th>Fee</th>
+        <th>Duration</th>
+        <th>Faculty ID</th>
+      </tr>
+    </thead>
+    <tbody id="courseTableBody"></tbody>
+  </table>
+
+  <script>
+    fetch("http://localhost:8080/faculties")
+      .then(res => res.json())
+      .then(data => {
+        const tbody = document.getElementById("facultyTableBody");
+        tbody.innerHTML = "";
+        data.forEach(f => {
+          const row = `<tr>
+            <td>${f.id}</td>
+            <td>${f.facultyName}</td>
+            <td>${f.dob}</td>
+            <td>${f.qualifications}</td>
+            <td>${f.designation}</td>
+            <td>${f.phoneNumber}</td>
+          </tr>`;
+          tbody.innerHTML += row;
+        });
+      });
+
+    fetch("http://localhost:8080/courses")
+      .then(res => res.json())
+      .then(data => {
+        const tbody = document.getElementById("courseTableBody");
+        tbody.innerHTML = "";
+        data.forEach(c => {
+          const row = `<tr>
+            <td>${c.id}</td>
+            <td>${c.name}</td>
+            <td>${c.fee}</td>
+            <td>${c.duration}</td>
+            <td>${c.facultyId}</td>
+          </tr>`;
+          tbody.innerHTML += row;
+        });
+      });
+  </script>
+</body>
+</html>

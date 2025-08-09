@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Course Management</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f7f9fc;
+      margin: 0;
+      padding: 20px;
+    }
+
+    h2 {
+      text-align: center;
+      color: #333;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+    }
+
+    th, td {
+      padding: 10px;
+      border: 1px solid #ccc;
+      text-align: center;
+    }
+
+    th {
+      background-color: #4CAF50;
+      color: white;
+    }
+
+    button {
+      margin: 2px;
+      padding: 5px 10px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      color: white;
+    }
+
+    button.edit {
+      background-color: #2196F3;
+    }
+
+    button.delete {
+      background-color: #f44336;
+    }
+
+    button.add {
+      background-color: #4CAF50;
+      margin-bottom: 15px;
+    }
+
+    .form-container {
+      display: none;
+      margin-bottom: 20px;
+      padding: 15px;
+      background-color: #e3f2fd;
+      border: 1px solid #90caf9;
+      border-radius: 5px;
+    }
+
+    .form-container input {
+      margin: 5px;
+      padding: 7px;
+      width: 20%;
+    }
+
+    .form-container button {
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+<h2>Course List</h2>
+<button class="add" onclick="showForm()">+ Add Course</button>
+
+<div class="form-container" id="courseForm">
+  <input type="hidden" id="id">
+  <input type="text" id="name" placeholder="Course Name" required>
+  <input type="text" id="fee" placeholder="Fee" required>
+  <input type="text" id="duration" placeholder="Duration">
+  <input type="text" id="facultyId" placeholder="Faculty ID" required>
+  <br>
+  <button onclick="submitCourse()">Submit</button>
+</div>
+
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Course Name</th>
+      <th>Fee</th>
+      <th>Duration</th>
+      <th>Faculty ID</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody id="courseTableBody"></tbody>
+</table>
+
+<script>
+  const courseApi = "http://localhost:8080/courses";
+
+  function showForm(course = null) {
+    const form = document.getElementById("courseForm");
+    form.style.display = "block";
+
+    if (course) {
+      document.getElementById("id").value = course.id;
+      document.getElementById("name").value = course.courseName;
+      document.getElementById("fee").value = course.fee;
+      document.getElementById("duration").value = course.duration;
+      document.getElementById("facultyId").value = course.facultyId;
+    } else {
+      form.reset();
+    }
+  }
+
+  function loadCourses() {
+    fetch(courseApi)
+      .then(res => res.json())
+      .then(data => {
+        const table = document.getElementById("courseTableBody");
+        table.innerHTML = "";
+        data.forEach(c => {
+          const row = `<tr>
+            <td>${c.id}</td>
+            <td>${c.name}</td>
+            <td>${c.fee}</td>
+            <td>${c.duration}</td>
+            <td>${c.facultyId}</td>
+            <td>
+              <button class="edit" onclick='editCourse(${JSON.stringify(c)})'>Edit</button>
+              <button class="delete" onclick="deleteCourse(${c.id})">Delete</button>
+            </td>
+          </tr>`;
+          table.innerHTML += row;
+        });
+      });
+  }
+
+  function submitCourse() {
+    const id = document.getElementById("id").value;
+    const course = {
+      courseName: document.getElementById("name").value,
+      fee: document.getElementById("fee").value,
+      duration: document.getElementById("duration").value,
+      facultyId: document.getElementById("facultyId").value
+    };
+
+    const method = id ? "PUT" : "POST";
+    const url = id ? `${courseApi}/${id}` : courseApi;
+
+    fetch(url, {
+      method: method,
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(course)
+    }).then(() => {
+      document.getElementById("courseForm").reset();
+      document.getElementById("courseForm").style.display = "none";
+      loadCourses();
+    });
+  }
+
+  function editCourse(course) {
+    showForm(course);
+  }
+
+  function deleteCourse(id) {
+    if (confirm("Are you sure you want to delete this course?")) {
+      fetch(`${courseApi}/${id}`, {
+        method: "DELETE"
+      }).then(() => loadCourses());
+    }
+  }
+
+  window.onload = loadCourses;
+</script>
+</body>
+</html>
